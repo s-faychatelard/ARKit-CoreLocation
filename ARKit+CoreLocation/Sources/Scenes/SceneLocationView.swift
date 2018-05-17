@@ -55,6 +55,7 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
     public var showAxesNode = false
     
     private(set) var locationNodes = [LocationNode]()
+    private(set) var polylineNodes = [PolylineNode]()
     
     private var sceneLocationEstimates = [SceneLocationEstimate]()
     
@@ -483,9 +484,26 @@ public class SceneLocationView: ARSCNView, ARSCNViewDelegate {
         case .limited(.initializing):
             print("camera did change tracking state: limited, initializing")
         case .normal:
-            print("camera did change tracking state: normal")
+            print("camera did change tracking state: norma'l")
         case .notAvailable:
             print("camera did change tracking state: not available")
+        case .limited(.relocalizing):
+            print("camera did change tracking state: limited, relocalizing")
+        }
+    }
+}
+
+//MARK: Draw polyline route
+@available(iOS 11.0, *)
+public extension SceneLocationView {
+    public func addRoutes(polyline: [CLLocationCoordinate2D], color: UIColor? = nil) {
+        guard let altitude = locationManager.currentLocation?.altitude else { return }
+        let polyNode = PolylineNode(polyline: polyline, altitude: altitude - 2.0, boxColor: color)
+
+        polylineNodes.append(polyNode)
+        polyNode.locationNodes.forEach {
+            updatePositionAndScaleOfLocationNode(locationNode: $0, initialSetup: true, animated: false)
+            sceneNode?.addChildNode($0)
         }
     }
 }
